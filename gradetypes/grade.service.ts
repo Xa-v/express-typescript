@@ -15,6 +15,11 @@ export class GradeService {
     const scoreRepo = db.dataSource.getRepository(Scorelist);
     const studentRepo = db.dataSource.getRepository(Studentlist);
 
+     const allowedScoreTypes = ["Attendance", "Quiz", "Project", "Exam"];
+  if (!allowedScoreTypes.includes(data.scoretype)) {
+    throw new Error("Invalid scoretype. Must be one of: Attendance, Quiz, Project, Exam.");
+  }
+
     // 1. Save new grade entry
     const newGrade = gradeRepo.create({
       attendanceDate: data.attendanceDate,

@@ -4,7 +4,8 @@ import cors from "cors";
 import errorHandler from "./_middleware/error-handler";
 import dotenv from "dotenv";
 import { initializeDb } from "./_helpers/db";
-import employeeRoutes from "./employees/employees.controller";
+import studentDataRoutes from "./students/students.controller";
+import gradetypesDateRoutes from "./gradetypes/grades.controller";
 
 dotenv.config();
 
@@ -14,7 +15,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-app.use("/employees", employeeRoutes);
+
+app.use("/students", studentDataRoutes);
+app.use("/grades", gradetypesDateRoutes);
+
 app.use(errorHandler);
 
 const port = process.env.NODE_ENV === "production" ? (process.env.PORT || 80) : 4000;

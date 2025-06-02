@@ -9,12 +9,12 @@ export class Gradelist {
   @Column({ type: "date", nullable: true })
   attendanceDate!: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   scoretype!: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: false })
   perfectscore!: number;
-
+ 
 
   @Column({ default: true })
   active!: boolean;

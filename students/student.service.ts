@@ -65,6 +65,7 @@ export class StudentService {
   //DELETE STUDENT
     async deleteById(studentgradeid: number) {
     const studentRepo = db.dataSource.getRepository(Studentlist);
+      const scoreRepo = db.dataSource.getRepository(Scorelist);
 
     // Check if student exists
     const student = await studentRepo.findOne({ where: { studentgradeid } });
@@ -72,11 +73,23 @@ export class StudentService {
       throw new Error("Student not found.");
     }
 
-    // Delete student
-    await studentRepo.remove(student);
-    return { message: "Student deleted successfully." };
+  // Find and delete all score entries for the student
+  const scoreEntries = await scoreRepo.find({
+    where: { studentgradeid },
+  });
+
+  if (scoreEntries.length > 0) {
+    await scoreRepo.remove(scoreEntries);
   }
 
+  // Delete the student
+  await studentRepo.remove(student);
+
+  return {
+    message: "Student and associated score entries deleted successfully.",
+    scoresDeleted: scoreEntries.length,
+  };
+}
 
 
 }

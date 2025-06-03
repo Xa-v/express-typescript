@@ -20,7 +20,7 @@ export async function initializeDb() {
   const typeOrmConfig = {
     type: "sqlite" as const,
     database: path.join(process.cwd(), "db.sqlite"), // or "./db.sqlite"
-    synchronize: true, // Auto-sync schema (good for dev)
+    synchronize: false,
     logging: true,
     entities: [Studentlist, Gradelist, Scorelist, ComputedGradelist],
   };

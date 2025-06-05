@@ -92,4 +92,19 @@ export class StudentService {
 }
 
 
+// GET ALL STUDENTS SORTED A–Z
+async getAll() {
+  const studentRepo = db.dataSource.getRepository(Studentlist);
+
+  const students = await studentRepo.find({
+    select:["studentName"],
+    order: {
+      studentName: "ASC", // A to Z
+    },
+  });
+
+  return students;
+}
+
+
 }

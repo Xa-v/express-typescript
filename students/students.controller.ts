@@ -40,4 +40,16 @@ router.delete('/:studentgradeid', (async (req: Request, res: Response): Promise<
   }
 }) as RequestHandler); // 👈 Cast to RequestHandler
 
+
+
+// GET ALL STUDENTS SORTED A–Z
+router.get("/", async (req, res, next) => {
+  try {
+    const students = await Student.getAll();
+    res.json(students);
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

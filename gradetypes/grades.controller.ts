@@ -72,7 +72,23 @@ router.post("/addattendance", async (req: Request, res: Response) => {
   }
 });
 
+// UPDATE  SCORE
+router.put("/updatescore/:id", (async (req: Request, res: Response): Promise<void> => {
+  try {
+    const scoreid = parseInt(req.params.id);
+    const { score } = req.body;
 
+    if (isNaN(scoreid)) {
+      res.status(400).json({ message: "Invalid score ID." });
+      return;
+    }
+
+    const result = await Grade.updateScore(scoreid, score);
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+}) as RequestHandler);
 
 
 export default router;

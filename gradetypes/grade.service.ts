@@ -163,4 +163,38 @@ async updatePerfectScore(gradeid: number, newPerfectScore: number) {
   }
 
 
+
+
+  // UPDATE SCORE BY SCOREID ONLY
+async updateScore(scoreid: number, newScoreInput: number) {
+  const gradeRepo = db.dataSource.getRepository(Gradelist);
+  const scoreRepo = db.dataSource.getRepository(Scorelist);
+
+  // Validate input
+  if (typeof newScoreInput !== "number" || newScoreInput <= 0) {
+    throw new Error("Score Input must be a positive number.");
+  }
+
+  // Check if score exists
+  const score = await scoreRepo.findOne({ where: { scoreid } });
+  if (!score) {
+    throw new Error("Score not found.");
+  }
+
+  // Update perfectscore
+  score.score = newScoreInput;
+  await scoreRepo.save(score);
+
+  
+
+  return {
+    message: "score updated successfully.",
+    updatedGrade: score,
+  };
 }
+
+
+
+}
+
+

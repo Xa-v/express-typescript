@@ -195,6 +195,55 @@ async updateScore(scoreid: number, newScoreInput: number) {
 
 
 
+async getScoresByScoreType(scoretype: string) {
+  const gradeRepo = db.dataSource.getRepository(Gradelist);
+  const scoreRepo = db.dataSource.getRepository(Scorelist);
+  const studentRepo = db.dataSource.getRepository(Studentlist);
+
+  const allowedTypes = ["Attendance", "Quiz", "Project", "Exam"];
+  if (!allowedTypes.includes(scoretype)) {
+    throw new Error("Invalid scoretype.");
+  }
+
+  // Get all grades of this scoretype
+  const grades = await gradeRepo.find({
+    where: { scoretype },
+    order: { gradeid: "ASC" },
+  });
+
+  const gradeIds = grades.map((g) => g.gradeid);
+
+  // Get all students
+  const students = await studentRepo.find({
+    order: { studentName: "ASC" },
+    relations: ["scores"],
+  });
+
+  // Map student scores
+  const result = students.map((student) => {
+    const studentScores: Record<number, number | null> = {};
+    gradeIds.forEach((gid) => {
+      const scoreEntry = student.scores.find((s) => s.gradeid === gid);
+      studentScores[gid] = scoreEntry ? scoreEntry.score : null;
+    });
+
+    return {
+      studentName: student.studentName,
+      scores: studentScores, // { gradeid1: score, gradeid2: score, ... }
+    };
+  });
+
+  return {
+    headers: grades.map((g) => ({
+      gradeid: g.gradeid,
+      perfectscore: g.perfectscore,
+    })),
+    students: result,
+  };
+}
+
+
+
 }
 
 

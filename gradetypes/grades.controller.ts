@@ -91,4 +91,23 @@ router.put("/updatescore/:id", (async (req: Request, res: Response): Promise<voi
 }) as RequestHandler);
 
 
+router.get("/:scoretype", (async (req: Request, res: Response): Promise<void>  => {
+    try {
+      const scoretype = req.params.scoretype; // e.g. "/grades/Quiz"
+
+      const data = await Grade.getScoresByScoreType(scoretype);
+
+       res.status(200).json({
+        message: `Scores for scoretype: ${scoretype}`,
+        data,
+      });
+    } catch (error: any) {
+       res.status(400).json({
+        message: error.message || "Failed to get scores",
+      });
+    }
+  })as RequestHandler);
+
+
+
 export default router;

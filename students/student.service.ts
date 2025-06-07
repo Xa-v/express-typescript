@@ -1,6 +1,7 @@
 import { Studentlist } from './student.entity';
 import { Gradelist } from "../grades/gradelist.entity";
 import { Scorelist } from "../grades/score.entity";
+import { ComputedGradelist } from "../grades/computedgrade.entity"
 import { db } from "../_helpers/db";
 
 interface CreateStudentDto {
@@ -14,7 +15,8 @@ export class StudentService {
     const studentRepo = db.dataSource.getRepository(Studentlist);
     const gradeRepo = db.dataSource.getRepository(Gradelist);
     const scoreRepo = db.dataSource.getRepository(Scorelist);
-
+    const computedGradeRepo = db.dataSource.getRepository(ComputedGradelist);
+    
     const name = data.studentName;
 
     // Validate studentName
@@ -58,6 +60,14 @@ export class StudentService {
       await scoreRepo.save(scoreEntries);
     }
 
+
+    // Create a corresponding computed grade entry
+    const computedGrade = computedGradeRepo.create({
+      studentgradeid: savedStudent.studentgradeid,
+    });
+
+    await computedGradeRepo.save(computedGrade);
+
     return savedStudent;
   }
 
@@ -66,6 +76,7 @@ export class StudentService {
     async deleteById(studentgradeid: number) {
     const studentRepo = db.dataSource.getRepository(Studentlist);
       const scoreRepo = db.dataSource.getRepository(Scorelist);
+      const computedRepo = db.dataSource.getRepository(ComputedGradelist);
 
     // Check if student exists
     const student = await studentRepo.findOne({ where: { studentgradeid } });
@@ -82,28 +93,57 @@ export class StudentService {
     await scoreRepo.remove(scoreEntries);
   }
 
-  // Delete the student
+  // Delete computed grade entries (related via `student`)
+  const computedGrades = await computedRepo.find({
+    where: { student: { studentgradeid } },
+  });
+  if (computedGrades.length > 0) {
+    await computedRepo.remove(computedGrades);
+  }
+
+  // Delete student
   await studentRepo.remove(student);
 
   return {
-    message: "Student and associated score entries deleted successfully.",
+    message: "Student and associated scores and computed grades deleted successfully.",
     scoresDeleted: scoreEntries.length,
+    computedGradesDeleted: computedGrades.length,
   };
 }
 
 
 // GET ALL STUDENTS SORTED A–Z
 async getAll() {
-  const studentRepo = db.dataSource.getRepository(Studentlist);
+  const computedRepo = db.dataSource.getRepository(ComputedGradelist);
 
-  const students = await studentRepo.find({
-    select:["studentName"],
-    order: {
-      studentName: "ASC", // A to Z
-    },
-  });
+  const records = await computedRepo
+    .createQueryBuilder("computed")
+    .leftJoinAndSelect("computed.student", "student")
+    .orderBy("student.studentName", "ASC")
+    .getMany();
 
-  return students;
+  // Flatten the structure: merge computed + student fields into one object
+  const studentdata = records.map((record) => ({
+    studentName: record.student?.studentName || "",
+    computedgradeid: record.computedgradeid,
+    studentgradeid: record.studentgradeid,
+    totalattendance: record.totalattendance,
+    perfectattendancescore: record.perfectattendancescore,
+    attendance10percent: record.attendance10percent,
+    totalquiz: record.totalquiz,
+    perfectquizscore: record.perfectquizscore,
+    quiz15percent: record.quiz15percent,
+    totalproject: record.totalproject,
+    perfectprojectscore: record.perfectprojectscore,
+    project30percent: record.project30percent,
+    totalexam: record.totalexam,
+    perfectexamscore: record.perfectexamscore,
+    exam45percent: record.exam45percent,
+    finalcomputedgrade: record.finalcomputedgrade,
+    transmutedgrade: record.transmutedgrade,
+  }));
+
+  return studentdata;
 }
 
 

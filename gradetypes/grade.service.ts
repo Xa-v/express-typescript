@@ -170,6 +170,7 @@ async updateScore(scoreid: number, newScoreInput: number) {
   const gradeRepo = db.dataSource.getRepository(Gradelist);
   const scoreRepo = db.dataSource.getRepository(Scorelist);
 
+ 
   // Validate input
   if (typeof newScoreInput !== "number" || newScoreInput <= 0) {
     throw new Error("Score Input must be a positive number.");
@@ -181,6 +182,14 @@ async updateScore(scoreid: number, newScoreInput: number) {
     throw new Error("Score not found.");
   }
 
+   const grade = await gradeRepo.findOne({ where: { gradeid: score.gradeid } });
+  if (!grade) {
+    throw new Error("Associated grade not found.");
+  }
+
+  if (newScoreInput > grade.perfectscore) {
+    throw new Error(`Score cannot exceed the perfect score of ${grade.perfectscore}.`);
+  }
   // Update perfectscore
   score.score = newScoreInput;
   await scoreRepo.save(score);
@@ -220,12 +229,18 @@ async getScoresByScoreType(scoretype: string) {
   });
 
   // Map student scores
-  const result = students.map((student) => {
-    const studentScores: Record<number, number | null> = {};
-    gradeIds.forEach((gid) => {
-      const scoreEntry = student.scores.find((s) => s.gradeid === gid);
-      studentScores[gid] = scoreEntry ? scoreEntry.score : null;
-    });
+const result = students.map((student) => {
+  const studentScores: Record<
+    number,
+    { scoreid: number; score: number | null }
+  > = {};
+
+  gradeIds.forEach((gid) => {
+    const scoreEntry = student.scores.find((s) => s.gradeid === gid);
+    studentScores[gid] = scoreEntry
+      ? { scoreid: scoreEntry.scoreid, score: scoreEntry.score }
+      : { scoreid: 0, score: null };
+  });
 
     return {
       studentName: student.studentName,

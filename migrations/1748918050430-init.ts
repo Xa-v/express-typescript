@@ -16,6 +16,8 @@ export class Init1748918050430 implements MigrationInterface {
         await queryRunner.query(`INSERT INTO "temporary_computedgradelists"("computedgradeid", "studentgradeid", "totalattendance", "perfectattendancescore", "attendance10percent", "totalquiz", "perfectquizscore", "quiz15percent", "totalproject", "perfectprojectscore", "project30percent", "totalexam", "perfectexamscore", "exam45percent", "finalcomputedgrade", "transmutedgrade") SELECT "computedgradeid", "studentgradeid", "totalattendance", "perfectattendancescore", "attendance10percent", "totalquiz", "perfectquizscore", "quiz15percent", "totalproject", "perfectprojectscore", "project30percent", "totalexam", "perfectexamscore", "exam45percent", "finalcomputedgrade", "transmutedgrade" FROM "computedgradelists"`);
         await queryRunner.query(`DROP TABLE "computedgradelists"`);
         await queryRunner.query(`ALTER TABLE "temporary_computedgradelists" RENAME TO "computedgradelists"`);
+       await queryRunner.query(`CREATE TABLE "attendance" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "status" varchar NOT NULL)`);
+       await queryRunner.query(`INSERT INTO "attendance" ("status") VALUES ('Present'), ('Absent'), ('Late'), ('Excused')`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
@@ -31,6 +33,7 @@ export class Init1748918050430 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "computedgradelists"`);
         await queryRunner.query(`DROP TABLE "scorelists"`);
         await queryRunner.query(`DROP TABLE "gradelists"`);
+        //  await queryRunner.query(`DROP TABLE "attendance"`);
     }
 
 }

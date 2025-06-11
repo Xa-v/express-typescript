@@ -259,6 +259,63 @@ const result = students.map((student) => {
 
 
 
+ // UPDATE Attendance BY SCOREID ONLY
+async updateAttendance(scoreid: number, attendanceStatus: string) {
+  const gradeRepo = db.dataSource.getRepository(Gradelist);
+  const scoreRepo = db.dataSource.getRepository(Scorelist);
+
+ 
+  // Check if score exists
+  const score = await scoreRepo.findOne({ where: { scoreid } });
+  if (!score) {
+    throw new Error("Attendance not found.");
+  }
+
+   const grade = await gradeRepo.findOne({ where: { gradeid: score.gradeid } });
+  if (!grade) {
+    throw new Error("Associated grade not found.");
+  }
+
+  // Update the score based on the attendance status
+const normalizedStatus = attendanceStatus
+  ?.trim()
+  .toLowerCase()
+  .replace(/\b\w/g, (char) => char.toUpperCase());
+
+switch (normalizedStatus) {
+    case 'Present':
+      score.score = 10;
+      break;
+    case 'Absent':
+      score.score = 0;
+      break;
+    case 'Late':
+      score.score = 7;
+      break;
+    case 'Excused':
+      score.score = 5;
+      break;
+    default:
+      throw new Error('Invalid attendance status. Must be one of: Present, Absent, Late, Excused.');
+  }
+
+  
+  // Update perfectscore
+score.attendanceStatus = normalizedStatus;
+  await scoreRepo.save(score);
+
+  
+
+  return {
+    message: "Attendance status updated successfully.",
+    scoreid: score.scoreid,
+    updatedScore: score.score,
+    attendanceStatus,
+  };
+}
+
+
+
 }
 
 

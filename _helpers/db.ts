@@ -4,6 +4,7 @@ import { Studentlist } from "../students/student.entity";
 import { Gradelist } from "../grades/gradelist.entity";
 import { Scorelist } from "../grades/score.entity";
 import { ComputedGradelist } from "../grades/computedgrade.entity";
+import { Attendance } from "../grades/attendance.entity";
 import path from "path";
 
 // Define an interface for the database object
@@ -22,7 +23,7 @@ export async function initializeDb() {
     database: path.join(process.cwd(), "db.sqlite"), // or "./db.sqlite"
     synchronize: false,
     logging: true,
-    entities: [Studentlist, Gradelist, Scorelist, ComputedGradelist],
+    entities: [Studentlist, Gradelist, Scorelist, ComputedGradelist,Attendance],
   };
 
   try {

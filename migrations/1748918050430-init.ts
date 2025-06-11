@@ -18,6 +18,7 @@ export class Init1748918050430 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "temporary_computedgradelists" RENAME TO "computedgradelists"`);
        await queryRunner.query(`CREATE TABLE "attendance" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "status" varchar NOT NULL)`);
        await queryRunner.query(`INSERT INTO "attendance" ("status") VALUES ('Present'), ('Absent'), ('Late'), ('Excused')`);
+         await queryRunner.query(`INSERT INTO "studentlists" ("studentName") VALUES ('Math'), ('Mae'), ('Flute'), ('PL')`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
@@ -33,7 +34,7 @@ export class Init1748918050430 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "computedgradelists"`);
         await queryRunner.query(`DROP TABLE "scorelists"`);
         await queryRunner.query(`DROP TABLE "gradelists"`);
-        //  await queryRunner.query(`DROP TABLE "attendance"`);
+         await queryRunner.query(`DROP TABLE "attendance"`);
     }
 
 }

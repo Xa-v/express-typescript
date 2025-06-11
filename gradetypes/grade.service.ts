@@ -2,6 +2,7 @@ import { db } from "../_helpers/db";
 import { Gradelist } from "../grades/gradelist.entity";
 import { Scorelist } from "../grades/score.entity";
 import { Studentlist } from "../students/student.entity";
+import { Attendance } from "../grades/attendance.entity";
 
 interface CreateGradeDto {
   attendanceDate?: string;
@@ -314,7 +315,18 @@ score.attendanceStatus = normalizedStatus;
   };
 }
 
+async getAllAttendanceStatuses() {
+  const attendanceRepo = db.dataSource.getRepository(Attendance);
 
+  const statuses = await attendanceRepo
+    .createQueryBuilder("attendance")
+    .select("attendance.status")
+    .orderBy("attendance.id", "ASC")
+    .getMany();
+
+  // Return just an array of strings
+  return statuses.map((item) => item.status);
+}
 
 }
 

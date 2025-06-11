@@ -4,6 +4,17 @@ import { GradeService } from "./grade.service";
 const router = Router();
 const Grade = new GradeService();
 
+router.get("/status", async (req: Request, res: Response) => {
+  try {
+    const statuses = await Grade.getAllAttendanceStatuses();
+    res.status(200).json({data: statuses });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
 // Create Grade with auto-generated scores
 router.post("/addgrade", async (req: Request, res: Response) => {
   try {
@@ -91,6 +102,8 @@ router.put("/updatescore/:id", (async (req: Request, res: Response): Promise<voi
 }) as RequestHandler);
 
 
+
+
 router.get("/:scoretype", (async (req: Request, res: Response): Promise<void>  => {
     try {
       const scoretype = req.params.scoretype; // e.g. "/grades/Quiz"
@@ -128,6 +141,11 @@ router.get("/:scoretype", (async (req: Request, res: Response): Promise<void>  =
     res.status(400).json({ message: error.message });
   }
 }) as RequestHandler);
+
+
+
+
+
 
 
 export default router;

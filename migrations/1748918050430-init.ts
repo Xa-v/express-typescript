@@ -19,6 +19,7 @@ export class Init1748918050430 implements MigrationInterface {
        await queryRunner.query(`CREATE TABLE "attendance" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "status" varchar NOT NULL)`);
        await queryRunner.query(`INSERT INTO "attendance" ("status") VALUES ('Present'), ('Absent'), ('Late'), ('Excused')`);
          await queryRunner.query(`INSERT INTO "studentlists" ("studentName") VALUES ('Math'), ('Mae'), ('Flute'), ('PL')`);
+         await queryRunner.query(`INSERT INTO "computedgradelists" ("studentgradeid") SELECT "studentgradeid" FROM "studentlists" WHERE "studentName" IN ('Math', 'Mae', 'Flute', 'PL');`)
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

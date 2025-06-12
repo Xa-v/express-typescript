@@ -233,19 +233,21 @@ async getScoresByScoreType(scoretype: string) {
 const result = students.map((student) => {
   const studentScores: Record<
     number,
-    { scoreid: number; score: number | null }
+ { scoreid: number; score: number | null; attendanceStatus: string }
   > = {};
 
   gradeIds.forEach((gid) => {
     const scoreEntry = student.scores.find((s) => s.gradeid === gid);
     studentScores[gid] = scoreEntry
-      ? { scoreid: scoreEntry.scoreid, score: scoreEntry.score }
-      : { scoreid: 0, score: null };
+      ? { scoreid: scoreEntry.scoreid, score: scoreEntry.score, attendanceStatus: scoreEntry.attendanceStatus }
+      : { scoreid: 0, score: null,  attendanceStatus: "",  };
+            
   });
 
     return {
       studentName: student.studentName,
       scores: studentScores, // { gradeid1: score, gradeid2: score, ... }
+      
     };
   });
 
@@ -253,12 +255,69 @@ const result = students.map((student) => {
     headers: grades.map((g) => ({
       gradeid: g.gradeid,
       perfectscore: g.perfectscore,
+      attendanceDate: g.attendanceDate
+      
     })),
     students: result,
   };
 }
 
+async getAttendance(scoretype: string) {
+  const gradeRepo = db.dataSource.getRepository(Gradelist);
+  const scoreRepo = db.dataSource.getRepository(Scorelist);
+  const studentRepo = db.dataSource.getRepository(Studentlist);
 
+  const allowedTypes = ["Attendance"];
+  if (!allowedTypes.includes(scoretype)) {
+    throw new Error("Invalid scoretype.");
+  }
+
+  // Get all grades of this scoretype
+  const grades = await gradeRepo.find({
+    where: { scoretype },
+    order: { attendanceDate: "ASC" },
+  });
+
+  const gradeIds = grades.map((g) => g.gradeid);
+
+  // Get all students
+  const students = await studentRepo.find({
+    order: { studentName: "ASC" },
+    relations: ["scores"],
+  });
+
+  // Map student scores
+const result = students.map((student) => {
+  const studentScores: Record<
+    number,
+ { scoreid: number; score: number | null; attendanceStatus: string }
+  > = {};
+
+  gradeIds.forEach((gid) => {
+    const scoreEntry = student.scores.find((s) => s.gradeid === gid);
+    studentScores[gid] = scoreEntry
+      ? { scoreid: scoreEntry.scoreid, score: scoreEntry.score, attendanceStatus: scoreEntry.attendanceStatus }
+      : { scoreid: 0, score: null,  attendanceStatus: "",  };
+            
+  });
+
+    return {
+      studentName: student.studentName,
+      scores: studentScores, // { gradeid1: score, gradeid2: score, ... }
+      
+    };
+  });
+
+  return {
+    headers: grades.map((g) => ({
+      gradeid: g.gradeid,
+      perfectscore: g.perfectscore,
+      attendanceDate: g.attendanceDate
+      
+    })),
+    students: result,
+  };
+}
 
  // UPDATE Attendance BY SCOREID ONLY
 async updateAttendance(scoreid: number, attendanceStatus: string) {
